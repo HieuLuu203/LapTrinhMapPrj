@@ -1,5 +1,4 @@
 import model.Entity;
-import model.MulticastHandler;
 import util.Constant;
 
 import java.io.IOException;
@@ -13,11 +12,11 @@ public class GameServer {
     private DatagramSocket serversocket;
     private MulticastSocket multicastSocket;
     private InetAddress multicastGroup;
-    private final Map<String, Entity> entityMap = new ConcurrentHashMap<>();
+    private final Map<Long, Entity> entityMap = new ConcurrentHashMap<>();
     private ServerHandler serverHandler;
     private MulticastHandler multicastHandler;
 
-    public void startServer() throws IOException {
+    public void startServer() throws IOException, InterruptedException {
         serversocket = new DatagramSocket(Constant.SERVER_PORT);
         multicastSocket = new MulticastSocket();
         multicastGroup = InetAddress.getByName(Constant.MULTICAST_GROUP);
