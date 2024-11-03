@@ -1,6 +1,7 @@
 import model.Entity;
 import model.Player;
 import util.Constant;
+import util.Preferences;
 import util.Vector2;
 
 import java.io.IOException;
@@ -11,9 +12,9 @@ import java.util.Map;
 
 public class ServerHandler implements Runnable {
     private final DatagramSocket socket;
-    private final Map<String, Entity> entityMap;
+    private final Map<Long, Entity> entityMap;
 
-    public ServerHandler(DatagramSocket socket, Map<String, Entity> entityMap) {
+    public ServerHandler(DatagramSocket socket, Map<Long, Entity> entityMap) {
         this.socket = socket;
         this.entityMap = entityMap;
     }
@@ -26,18 +27,16 @@ public class ServerHandler implements Runnable {
             try {
                 socket.receive(receiveDatagramPacket);
                 String received = new String(receiveDatagramPacket.getData(), 0, receiveDatagramPacket.getLength());
-                System.out.println("received" + received);
+                System.out.println("received: " + received);
                 if (received.equals("Connect to server")) {
                     connectToServer(receiveDatagramPacket.getAddress(), receiveDatagramPacket.getPort());
                 } else if (received.startsWith("Disconnect")) {
                     String[] stat = received.split(";");
-                    entityMap.get(stat[1]).setAlive(false);
-                } else if (received.startsWith("Ping")) {
-                    System.out.println("received ping");
-                }
-                else {
+                    entityMap.get(Long.parseLong(stat[1])).setAlive(false);
+                    Preferences.getInstance().setReceiveInput(true);
+                } else {
                     String[] stat = received.split("\\|");
-                    processInput(stat[0], stat[1], Float.parseFloat(stat[2]));
+                    processInput(Long.parseLong(stat[0]), stat[1], Float.parseFloat(stat[2]));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -53,15 +52,16 @@ public class ServerHandler implements Runnable {
         );
         Entity player = new Player(position, hitBox);
         entityMap.put(player.getId(), player);
-        String serverMessage = player.getId();
+        for (Map.Entry<Long, Entity> entry : entityMap.entrySet()) entry.getValue().setChanged(true);
+        String serverMessage = Long.toString(player.getId());
         System.out.println("connect send: " + serverMessage);
         byte[] serverMessageBuffer = serverMessage.getBytes();
         DatagramPacket sendDatagramPacket = new DatagramPacket(serverMessageBuffer, serverMessageBuffer.length, clientAddress, clientPort);
         socket.send(sendDatagramPacket);
+        Preferences.getInstance().setReceiveInput(true);
     }
 
-    private void processInput(String id, String input, float deltaTime) {
-
+    private void processInput(long id, String input, float deltaTime) {
         String[] singleInput = input.split(";");
         Player player = (Player) entityMap.get(id);
         Vector2 direction = new Vector2(0.f, 0.f);
@@ -75,7 +75,7 @@ public class ServerHandler implements Runnable {
         }
         direction.normalize();
         player.move(direction.multiply(player.getSpeed() * deltaTime));
+        player.setChanged(true);
+        Preferences.getInstance().setReceiveInput(true);
     }
 }
-
-
