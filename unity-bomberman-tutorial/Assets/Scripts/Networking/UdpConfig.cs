@@ -12,9 +12,13 @@ namespace Networking
         public int receivePort;
         public string multicastGroup;
         
-        public static string ConfigPath => "Assets/Configs/UdpConfig.json";
-        
-        public static UdpConfig Load() => JsonUtility.FromJson<UdpConfig>(File.ReadAllText(ConfigPath));
+        public static string ConfigPath => "Configs/UdpConfig";
+
+        public static UdpConfig Load()
+        {
+            var configText = Resources.Load<TextAsset>(ConfigPath);
+            return JsonUtility.FromJson<UdpConfig>(configText.text);
+        }
         
         public static UdpConfig sInstance = Load();
     }

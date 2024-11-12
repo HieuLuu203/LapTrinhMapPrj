@@ -22,6 +22,7 @@ namespace Networking
             _messageHandler = handler;
 
             _udpClient = new UdpClient();
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             var localEndPoint = new IPEndPoint(IPAddress.Any, _config.receivePort);
             _udpClient.Client.Bind(localEndPoint);
 
@@ -60,7 +61,7 @@ namespace Networking
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Debug.LogWarning(e);
                 }
             }
         }
