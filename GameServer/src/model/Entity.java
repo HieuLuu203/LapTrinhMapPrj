@@ -2,21 +2,24 @@ package model;
 
 import util.Vector2;
 
-import java.util.UUID;
-
 public abstract class Entity {
-    private final String id = UUID.randomUUID().toString();
+    private final long id;
     private final Vector2 position;
     private final Vector2 hitBox;
     private boolean isAlive;
+    private boolean isChanged;
 
     public Entity(Vector2 position, Vector2 hitBox) {
+        this.id = System.currentTimeMillis();
         this.position = position;
         this.hitBox = hitBox;
         this.isAlive = true;
+        this.isChanged = true;
     }
 
-    public String getId() {
+    abstract public String getType();
+
+    public long getId() {
         return id;
     }
 
@@ -34,5 +37,13 @@ public abstract class Entity {
 
     public void setAlive(boolean alive) {
         isAlive = alive;
+    }
+
+    public boolean isChanged() {
+        return isChanged;
+    }
+
+    public void setChanged(boolean changed) {
+        isChanged = changed;
     }
 }

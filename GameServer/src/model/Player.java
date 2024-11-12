@@ -1,6 +1,7 @@
 package model;
 
 import model.action.Moveable;
+import util.Constant;
 import util.Vector2;
 
 public class Player extends Entity implements Moveable {
@@ -9,8 +10,13 @@ public class Player extends Entity implements Moveable {
     }
 
     @Override
+    public String getType() {
+        return "Player";
+    }
+
+    @Override
     public float getSpeed() {
-        return 100f;
+        return Constant.PLAYER_SPEED;
     }
 
     @Override
